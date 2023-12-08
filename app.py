@@ -11,8 +11,9 @@ import token_encryption
 from bson import json_util
 from flask_cors import CORS
 import os
+import config
 
-uri = "mongodb+srv://skgezhil2005:EzHiL2005@losties.ot7o9de.mongodb.net/?retryWrites=true&w=majority"
+uri = f"mongodb+srv://{config.mongodb_username}:{config.mongodb_password}@{config.mongodb_database}.ot7o9de.mongodb.net/?retryWrites=true&w=majority"
 
 
 client = MongoClient(uri, tlsCAFile=certifi.where())
@@ -30,14 +31,22 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 s3 = boto3.client('s3',
-                  aws_access_key_id='AKIA4YVVFSBGSYW6UJ6B',
-                  aws_secret_access_key= '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',
+                  aws_access_key_id=f'{config.aws_access_key_id}',
+                  aws_secret_access_key= f'{config.aws_secret_access_key}',
                   config=Config(signature_version='s3v4')
                   )
 
 BUCKET_NAME='losties'
 
 base_dir = os.getcwd()
+
+# get username
+@app.route('/get_username', methods=['POST'])
+def getUsername():
+    json = request.json
+    roll_no = json['roll_no']
+    name = db.users.find_one({'roll_no': roll_no})['name']
+    return name
 
 @app.route('/add_reply', methods=['POST'])
 def addReply():
