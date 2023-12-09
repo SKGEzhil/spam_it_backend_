@@ -13,6 +13,9 @@ from flask_cors import CORS
 import os
 import config
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+
 uri = f"mongodb+srv://{config.mongodb_username}:{config.mongodb_password}@{config.mongodb_database}.ot7o9de.mongodb.net/?retryWrites=true&w=majority"
 
 
@@ -29,6 +32,10 @@ db = client.sample
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
 
 s3 = boto3.client('s3',
                   aws_access_key_id=f'{config.aws_access_key_id}',
@@ -163,4 +170,5 @@ def reply():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(debug=True)
+    app.run(host='0.0.0.0')
