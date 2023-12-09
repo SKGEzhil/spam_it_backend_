@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/lost_backend_.iml" filepath="$PROJECT_DIR$/lost_backend_.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spam_it_backend_.iml" filepath="$PROJECT_DIR$/spam_it_backend_.iml" />
     </modules>
   </component>
 </project>
