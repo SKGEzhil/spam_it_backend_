@@ -1,5 +1,4 @@
 import certifi
-import pymongo
 from pymongo import MongoClient
 
 import config

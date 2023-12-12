@@ -1,11 +1,9 @@
-import boto3, botocore
-import multiprocessing
+import boto3
 import certifi
 from botocore.config import Config
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from passlib.hash import sha256_crypt
 from pymongo import MongoClient
-from pymongo.server_api import ServerApi
 from werkzeug.utils import secure_filename
 from datetime import date
 import token_encryption
@@ -15,8 +13,7 @@ import os
 import config
 import firebase_admin
 from firebase_admin import credentials, messaging
-from bson.json_util import dumps
-import threading
+
 
 
 # Firebase admin sdk
@@ -114,7 +111,6 @@ def generateToken():
         else:
             print('incorrect')
             return 'incorrect'
-    return 'login Successfull'
 
 # get username
 @app.route('/get_username', methods=['POST'])
@@ -185,7 +181,6 @@ def register():
         return token
     else:
         return 'User already exists'
-    return 'Registration successful'
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -208,7 +203,6 @@ def login():
         else:
             print('incorrect')
             return 'incorrect'
-    return 'login Successfull'
 
 @app.route('/create_post', methods=['POST'])
 def createPost():
