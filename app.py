@@ -135,7 +135,7 @@ def addReply():
 def getReplies():
     json = request.json
     post_id = json['post_id']
-    replies = list(db.replies.find({'post_id': post_id}))
+    replies = list(db.replies.find({'post_id': post_id}).sort({ '_id': -1 }))
     replies_json = json_util.dumps(replies)
     return replies_json
 
@@ -223,7 +223,7 @@ def createPost():
 
 @app.route('/get_posts', methods=['GET'])
 def getPosts():
-    posts = list(db.posts.find())
+    posts = list(db.posts.find().sort({ '_id': -1 }))
     posts_json = json_util.dumps(posts)
     return posts_json
 
