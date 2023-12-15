@@ -188,7 +188,7 @@ def login():
     user = db.users.find_one({'roll_no': roll_no})
     if user is None:
         print('User not found')
-        return 'no_user'
+        return 'failed'
     else:
         pwd_hash = user.get('password', '')
         if sha256_crypt.verify(password, pwd_hash):
@@ -196,12 +196,10 @@ def login():
             print(id)
             token = token_encryption.encode(json)
             print(token)
-            data = token_encryption.decode(token)
-            print(data['roll_no'])
-            return 'success'
+            return token
         else:
             print('incorrect')
-            return 'incorrect'
+            return 'failed'
 
 @app.route('/create_post', methods=['POST'])
 def createPost():
