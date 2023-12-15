@@ -196,7 +196,8 @@ def login():
         pwd_hash = user.get('password', '')
         if sha256_crypt.verify(password, pwd_hash):
 
-            fcm_token_list = [user.get('fcm_token', []), fcm_token]
+            fcm_token_list = db.users.find_one({'roll_no': roll_no})['fcm_token']
+            fcm_token_list.add(fcm_token)
 
             db.users.update_one({'roll_no': roll_no}, {'$set': {'fcm_token': fcm_token_list}})
             print(id)
