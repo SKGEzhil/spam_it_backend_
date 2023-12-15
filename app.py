@@ -78,11 +78,7 @@ def tokenAuth():
         return 'no_user'
     else:
         pwd_hash = user.get('password', '')
-        if password == pwd_hash:
-            print(id)
-            token = token_encryption.encode(json)
-            print(token)
-            data = token_encryption.decode(token)
+        if sha256_crypt.verify(password, pwd_hash):
             print(data['roll_no'])
             return 'success'
         else:
