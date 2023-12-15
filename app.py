@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from werkzeug.utils import secure_filename
 from datetime import date
 import token_encryption
-from bson import json_util
+from bson import json_util, ObjectId
 from flask_cors import CORS
 import os
 import config
@@ -64,6 +64,21 @@ def sendNotification(name, body):
     # Response is a message ID string.
     print('Successfully sent message:', response)
     return 'success'
+
+# send reply notification
+def sendReplyNotification(tokens, name, reply):
+    # Create a list containing up to 500 registration tokens.
+    # These registration tokens come from the client FCM SDKs.
+    registration_tokens = tokens
+
+    message = messaging.MulticastMessage(
+        data={'name': f'{name} has replied to your post', 'body': f'reply'},
+        tokens=registration_tokens,
+    )
+    response = messaging.send_multicast(message)
+    # See the BatchResponse reference documentation
+    # for the contents of response.
+    print('{0} messages were sent successfully'.format(response.success_count))
 
 @app.route('/token_auth', methods=['POST'])
 def tokenAuth():
@@ -124,6 +139,12 @@ def addReply():
     post_id = json['post_id']
     name = db.users.find_one({'roll_no': roll_no})['name']
     db.replies.insert_one({'roll_no': roll_no, 'name': name,'reply': reply, 'post_id': post_id})
+
+    roll_no_creator = db.posts.find_one({'_id': ObjectId(post_id)})['roll_no']
+    name_creator = db.users.find_one({'roll_no': roll_no_creator})['name']
+    fcm_token_list = db.users.find_one({'roll_no': roll_no_creator})['fcm_token']
+    sendReplyNotification(fcm_token_list, name_creator, reply)
+
     return 'Reply success'
 
 # Get replies for a post
