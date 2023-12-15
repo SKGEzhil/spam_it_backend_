@@ -84,7 +84,7 @@ def tokenAuth():
             print(token)
             data = token_encryption.decode(token)
             print(data['roll_no'])
-            return 'Success'
+            return 'success'
         else:
             print('incorrect')
             return 'incorrect'
@@ -173,20 +173,22 @@ def register():
     name = json['name']
     email = json['email']
     password = json['password']
+    fcm_token = json['fcm_token']
     existing_user = db.users.find_one({'roll_no': roll_no})
     if existing_user is None:
         pwd_hash = sha256_crypt.encrypt(password)
-        db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash})
+        db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token})
         token = token_encryption.encode({'roll_no': roll_no, 'password': password})
         return token
     else:
-        return 'User already exists'
+        return 'failed'
 
 @app.route('/login', methods=['POST'])
 def login():
     json = request.json
     roll_no = json['roll_no']
     password = json['password']
+    fcm_token = json['fcm_token']
     user = db.users.find_one({'roll_no': roll_no})
     if user is None:
         print('User not found')
@@ -194,6 +196,7 @@ def login():
     else:
         pwd_hash = user.get('password', '')
         if sha256_crypt.verify(password, pwd_hash):
+            db.users.update_one({'roll_no': roll_no}, {'$set': {'fcm_token': fcm_token}})
             print(id)
             token = token_encryption.encode(json)
             print(token)
