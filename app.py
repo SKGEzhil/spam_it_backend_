@@ -171,9 +171,12 @@ def register():
     password = json['password']
     fcm_token = json['fcm_token']
     existing_user = db.users.find_one({'roll_no': roll_no})
+
+    fcm_token_list = [fcm_token]
+
     if existing_user is None:
         pwd_hash = sha256_crypt.encrypt(password)
-        db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token})
+        db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list})
         token = token_encryption.encode({'roll_no': roll_no, 'password': password})
         return token
     else:
@@ -192,7 +195,11 @@ def login():
     else:
         pwd_hash = user.get('password', '')
         if sha256_crypt.verify(password, pwd_hash):
-            db.users.update_one({'roll_no': roll_no}, {'$set': {'fcm_token': fcm_token}})
+
+            fcm_token_list = user.get('fcm_token', [])
+            fcm_token_list.append(fcm_token)
+
+            db.users.update_one({'roll_no': roll_no}, {'$set': {'fcm_token': fcm_token_list}})
             print(id)
             token = token_encryption.encode(json)
             print(token)
