@@ -44,6 +44,29 @@ s3 = boto3.client('s3',
 BUCKET_NAME='losties'
 base_dir = os.getcwd()
 
+
+# opened post
+@app.route('/set_opened', methods=['POST'])
+def setOpened():
+    json = request.json
+    post_id = json['post_id']
+    roll_no = json['roll_no']
+
+    opened_posts = db.opened.find_one({'roll_no': roll_no})['posts']
+    opened_posts.append(post_id)
+
+    db.opened.update_one({'roll_no': roll_no}, {'$set': {'posts': opened_posts}})
+    return 'success'
+
+# get opened post
+@app.route('/get_opened', methods=['POST'])
+def getOpened():
+    json = request.json
+    roll_no = json['roll_no']
+    opened_posts = list(db.opened.find_one({'roll_no': roll_no})['posts'])
+    opened_post_json = json_util.dumps(opened_posts)
+    return opened_post_json
+
 # send fcm notification
 @app.route('/send_notification', methods=['GET'])
 def sendNotification(name, body):
@@ -72,7 +95,7 @@ def sendReplyNotification(tokens, name, reply):
     registration_tokens = tokens
 
     message = messaging.MulticastMessage(
-        data={'name': f'{name} has replied to your post', 'body': f'reply'},
+        data={'name': f'{name} has replied to your post', 'body': f'{reply}'},
         tokens=registration_tokens,
     )
     response = messaging.send_multicast(message)
@@ -198,6 +221,7 @@ def register():
     if existing_user is None:
         pwd_hash = sha256_crypt.encrypt(password)
         db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list})
+        db.opened.insert_one({'roll_no': roll_no, 'posts': []})
         token = token_encryption.encode({'roll_no': roll_no, 'password': password})
         return token
     else:
