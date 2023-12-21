@@ -265,9 +265,9 @@ def createPost():
     content = json['content']
     image = json['image']
     tags = json['tags']
-    cab_details = json['cabDetails']
+    cab_details = json['cab']
 
-    cabDetails = pyjson.loads(cab_details)
+    # cabDetails = pyjson.loads(cab_details)
 
     tagList = []
 
@@ -275,7 +275,7 @@ def createPost():
         tagList.append(tag)
 
     name = db.users.find_one({'roll_no': roll_no})['name']
-    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cabDetails, 'date':today.strftime("%d %b")})
+    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b")})
 
     sendNotification(name, subject)
 
