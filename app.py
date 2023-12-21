@@ -271,7 +271,7 @@ def createPost():
         tagList.append(tag)
 
     name = db.users.find_one({'roll_no': roll_no})['name']
-    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tags, 'date':today.strftime("%d %b")})
+    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'date':today.strftime("%d %b")})
 
     sendNotification(name, subject)
 
