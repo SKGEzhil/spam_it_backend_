@@ -13,6 +13,7 @@ import os
 import config
 import firebase_admin
 from firebase_admin import credentials, messaging
+import json as pyjson
 
 
 
@@ -264,7 +265,9 @@ def createPost():
     content = json['content']
     image = json['image']
     tags = json['tags']
-    cabDetails = json['cabDetails']
+    cab_details = json['cabDetails']
+
+    cabDetails = pyjson.loads(cab_details)
 
     tagList = []
 
