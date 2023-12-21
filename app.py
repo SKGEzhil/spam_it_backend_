@@ -263,8 +263,9 @@ def createPost():
     subject = json['subject']
     content = json['content']
     image = json['image']
+    tags = json['tags']
     name = db.users.find_one({'roll_no': roll_no})['name']
-    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'replies': [], 'date':today.strftime("%d %b")})
+    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tags, 'date':today.strftime("%d %b")})
 
     sendNotification(name, subject)
 
