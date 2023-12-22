@@ -180,6 +180,18 @@ def getReplies():
     replies_json = json_util.dumps(replies)
     return replies_json
 
+@app.route('/get_all_replies', methods=['POST'])
+def getAllReplies():
+    json = request.json
+    roll_no = json['roll_no']
+    all_posts = [str(post['_id']) for post in db.posts.find({'roll_no': roll_no})]
+    all_replies = []
+    for post_id in all_posts:
+        replies = list(db.replies.find({'post_id': post_id}).sort({ '_id': -1 }))
+        all_replies.extend(replies)
+    replies_json = json_util.dumps(all_replies)
+    return replies_json
+
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'image' not in request.files:
