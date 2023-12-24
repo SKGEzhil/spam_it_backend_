@@ -103,7 +103,7 @@ def sendReplyNotification(tokens, name, reply):
         data={'name': f'{name} has replied to your post', 'body': f'{reply}'},
         tokens=registration_tokens,
     )
-    response = messaging.send_multicast(message)
+    response = messaging.send_each_for_multicast(message)
     # See the BatchResponse reference documentation
     # for the contents of response.
     print('{0} messages were sent successfully'.format(response.success_count))
