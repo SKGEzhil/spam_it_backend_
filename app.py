@@ -53,7 +53,11 @@ def setOpened():
     post_id = json['post_id']
     roll_no = json['roll_no']
 
+    print(post_id)
+    print(roll_no)
+
     opened_posts = db.opened.find_one({'roll_no': roll_no})['posts']
+    print(opened_posts)
     opened_posts.append(post_id)
 
     db.opened.update_one({'roll_no': roll_no}, {'$set': {'posts': opened_posts}})
