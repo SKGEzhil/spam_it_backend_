@@ -99,9 +99,18 @@ def sendReplyNotification(tokens, name, reply):
     # These registration tokens come from the client FCM SDKs.
     registration_tokens = tokens
 
+    # Filter out invalid or empty tokens
+    valid_tokens = [token for token in tokens if isinstance(token, str) and token]
+
+    # Check if there are valid tokens
+    if not valid_tokens:
+        print("No valid tokens to send notifications.")
+        return
+
+
     message = messaging.MulticastMessage(
         data={'name': f'{name} has replied to your post', 'body': f'{reply}'},
-        tokens=registration_tokens,
+        tokens=valid_tokens,
     )
     response = messaging.send_each_for_multicast(message)
     # See the BatchResponse reference documentation
