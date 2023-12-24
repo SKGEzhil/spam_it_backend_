@@ -174,6 +174,10 @@ def addReply():
     roll_no_creator = db.posts.find_one({'_id': ObjectId(post_id)})['roll_no']
     name_creator = db.users.find_one({'roll_no': roll_no_creator})['name']
     fcm_token_list = db.users.find_one({'roll_no': roll_no_creator})['fcm_token']
+
+    print('DCM TOKEN LIST : ')
+    print(fcm_token_list)
+
     sendReplyNotification(fcm_token_list, name_creator, reply)
 
     return 'Reply success'
