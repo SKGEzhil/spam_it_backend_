@@ -1,3 +1,5 @@
+import datetime
+
 import boto3
 import certifi
 from botocore.config import Config
@@ -107,10 +109,15 @@ def sendReplyNotification(tokens, name, reply):
         print("No valid tokens to send notifications.")
         return
 
+
     message = messaging.MulticastMessage(
         notification=messaging.Notification(
             title=f'{name} has replied to your post',
             body=f'{reply}',
+        ),
+        android=messaging.AndroidConfig(
+            ttl=datetime.timedelta(seconds=259200),
+            priority='high',
         ),
         tokens=valid_tokens,
 
