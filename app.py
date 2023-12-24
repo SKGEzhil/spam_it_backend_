@@ -107,11 +107,20 @@ def sendReplyNotification(tokens, name, reply):
         print("No valid tokens to send notifications.")
         return
 
-
     message = messaging.MulticastMessage(
-        data={'name': f'{name} has replied to your post', 'body': f'{reply}'},
+        notification=messaging.Notification(
+            title=f'{name} has replied to your post',
+            body=f'{reply}',
+        ),
         tokens=valid_tokens,
+
     )
+
+    # message = messaging.MulticastMessage(
+    #     data={'name': f'{name} has replied to your post', 'body': f'{reply}'},
+    #     tokens=valid_tokens,
+    # )
+
     response = messaging.send_each_for_multicast(message)
     # See the BatchResponse reference documentation
     # for the contents of response.
