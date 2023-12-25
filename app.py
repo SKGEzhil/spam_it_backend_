@@ -76,16 +76,21 @@ def getOpened():
 
 # send fcm notification
 @app.route('/send_notification', methods=['GET'])
-def sendNotification(name, body):
+def sendNotification(name, body, post_id):
     # The topic name can be optionally prefixed with "/topics/".
     topic = 'topic'
 
     # See documentation on defining a message payload.
     message = messaging.Message(
-        data={
-            'name': name,
-            'body': body,
-        },
+        notification=messaging.Notification(
+            title=f'{name} has shared a new post',
+            body=f'{body}',
+        ),
+        android=messaging.AndroidConfig(
+            ttl=datetime.timedelta(seconds=259200),
+            priority='high',
+        ),
+        data={'post_id': post_id},
         topic=topic,
     )
 
@@ -325,8 +330,10 @@ def createPost():
 
     name = db.users.find_one({'roll_no': roll_no})['name']
     db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b")})
+    post_id = str(db.posts.find_one({'roll_no': roll_no, 'subject': subject, 'content': content})['_id'])
+    print(f'POST ID : {post_id}')
 
-    sendNotification(name, subject)
+    sendNotification(name, subject, post_id)
 
     return 'success'
 
