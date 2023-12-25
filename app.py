@@ -96,7 +96,7 @@ def sendNotification(name, body):
     return 'success'
 
 # send reply notification
-def sendReplyNotification(tokens, name, reply):
+def sendReplyNotification(tokens, name, reply, post_id):
     # Create a list containing up to 500 registration tokens.
     # These registration tokens come from the client FCM SDKs.
     registration_tokens = tokens
@@ -119,6 +119,7 @@ def sendReplyNotification(tokens, name, reply):
             ttl=datetime.timedelta(seconds=259200),
             priority='high',
         ),
+        data={'post_id': post_id},
         tokens=valid_tokens,
 
     )
@@ -203,7 +204,7 @@ def addReply():
     print('DCM TOKEN LIST : ')
     print(fcm_token_list)
 
-    sendReplyNotification(fcm_token_list, name_creator, reply)
+    sendReplyNotification(fcm_token_list, name_creator, reply, post_id)
 
     return 'Reply success'
 
