@@ -90,7 +90,10 @@ def sendNotification(name, body, post_id):
             ttl=datetime.timedelta(seconds=259200),
             priority='high',
         ),
-        data={'post_id': post_id},
+        data={
+            'post_id': post_id,
+            'type': 'post'
+        },
         topic=topic,
     )
 
@@ -124,7 +127,10 @@ def sendReplyNotification(tokens, name, reply, post_id):
             ttl=datetime.timedelta(seconds=259200),
             priority='high',
         ),
-        data={'post_id': post_id},
+        data={
+            'post_id': post_id,
+            'type': 'reply'
+        },
         tokens=valid_tokens,
 
     )
