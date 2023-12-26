@@ -117,7 +117,7 @@ def sendNotification(name, body, post_id):
     return 'success'
 
 # send reply notification
-def sendReplyNotification(tokens, name, reply, post_id):
+def sendReplyNotificationToCreator(tokens, name, reply, post_id):
     # Create a list containing up to 500 registration tokens.
     # These registration tokens come from the client FCM SDKs.
     registration_tokens = tokens
@@ -157,6 +157,48 @@ def sendReplyNotification(tokens, name, reply, post_id):
     # See the BatchResponse reference documentation
     # for the contents of response.
     print('{0} messages were sent successfully'.format(response.success_count))
+
+def sendReplyNotificationToOthers(tokens, name, reply, post_id):
+    # Create a list containing up to 500 registration tokens.
+    # These registration tokens come from the client FCM SDKs.
+    registration_tokens = tokens
+
+    # Filter out invalid or empty tokens
+    valid_tokens = [token for token in tokens if isinstance(token, str) and token]
+
+    # Check if there are valid tokens
+    if not valid_tokens:
+        print("No valid tokens to send notifications.")
+        return
+
+
+    message = messaging.MulticastMessage(
+        notification=messaging.Notification(
+            title=f'{name} has replied to a post you commented on',
+            body=f'{reply}',
+        ),
+        android=messaging.AndroidConfig(
+            ttl=datetime.timedelta(seconds=259200),
+            priority='high',
+        ),
+        data={
+            'post_id': post_id,
+            'type': 'reply'
+        },
+        tokens=valid_tokens,
+
+    )
+
+    # message = messaging.MulticastMessage(
+    #     data={'name': f'{name} has replied to your post', 'body': f'{reply}'},
+    #     tokens=valid_tokens,
+    # )
+
+    response = messaging.send_each_for_multicast(message)
+    # See the BatchResponse reference documentation
+    # for the contents of response.
+    print('{0} messages were sent successfully'.format(response.success_count))
+
 
 @app.route('/token_auth', methods=['POST'])
 def tokenAuth():
@@ -224,12 +266,16 @@ def addReply():
 
     roll_no_creator = db.posts.find_one({'_id': ObjectId(post_id)})['roll_no']
     name_creator = db.users.find_one({'roll_no': roll_no_creator})['name']
-    fcm_token_list = db.users.find_one({'roll_no': roll_no_creator})['fcm_token']
+    creator_fcm_token_list = db.users.find_one({'roll_no': roll_no_creator})['fcm_token']
+    replies_fcm_token_list = db.posts.find_one({'_id': ObjectId(post_id)})['replies']
+    fcm_token_list = db.users.find_one({'roll_no': roll_no})['fcm_token']
+    replies_fcm_token_list.extend(fcm_token_list)
 
-    print('DCM TOKEN LIST : ')
-    print(fcm_token_list)
 
-    sendReplyNotification(fcm_token_list, name_creator, reply, post_id)
+    db.posts.update_one({'_id': ObjectId(post_id)}, {'$set': {'replies': replies_fcm_token_list}})
+
+    sendReplyNotificationToCreator(creator_fcm_token_list, name, reply, post_id)
+    sendReplyNotificationToOthers(replies_fcm_token_list, name, reply, post_id)
 
     return 'Reply success'
 
@@ -349,7 +395,7 @@ def createPost():
         tagList.append(tag)
 
     name = db.users.find_one({'roll_no': roll_no})['name']
-    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b")})
+    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b"), 'replies': []})
     post_id = str(db.posts.find_one({'roll_no': roll_no, 'subject': subject, 'content': content})['_id'])
     print(f'POST ID : {post_id}')
 
