@@ -271,6 +271,8 @@ def addReply():
     fcm_token_list = db.users.find_one({'roll_no': roll_no})['fcm_token']
     replies_fcm_token_list.extend(fcm_token_list)
 
+    creator_fcm_token_list = list(set(creator_fcm_token_list))
+    replies_fcm_token_list = list(set(replies_fcm_token_list))
 
     db.posts.update_one({'_id': ObjectId(post_id)}, {'$set': {'replies': replies_fcm_token_list}})
 
