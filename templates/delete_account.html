@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- Add this in the <head> section of your HTML -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <title>Account Deletion Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            color: #666;
+        }
+        a {
+            color: #0077cc;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #0077cc;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<h1>Account Deletion Request</h1>
+<p>If you would like to request the deletion of your account or have any account-related concerns, please fill out the form below:</p>
+<form method="post" id="deleteAccountForm">
+    <label for="name">Your Name:</label>
+    <input type="text" id="name" name="name" >
+
+    <label for="roll_no">Your Rol Number:</label>
+    <input type="text" id="roll_no" name="roll_no" required>
+
+    <label for="message">Message:</label>
+    <textarea id="message" name="message" rows="4" ></textarea>
+
+    <input type="submit" value="Submit">
+</form>
+<p>If you have any issues or questions regarding your account, please use this form to contact our support team.</p>
+</body>
+
+<!-- Modify your JavaScript code -->
+<script>
+    document.getElementById("deleteAccountForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const formObject = {};
+
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+
+        const jsonData = JSON.stringify(formObject);
+
+        // Replace 'your_server_endpoint' with your actual server endpoint
+        fetch('http://localhost:80/delete_account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: jsonData
+        })
+            .then(response => response.text())
+            .then(data => {
+                // Check if the response indicates success
+                if (data === 'success') {
+                    // Display a success toast
+                    Toastify({
+                        text: 'Account deleted successfully',
+                        duration: 3000, // 3 seconds
+                        close: true,
+                        gravity: 'top', // 'top' or 'bottom'
+                        position: 'center', // 'left', 'center', or 'right'
+                        backgroundColor: 'green',
+                        stopOnFocus: true // Stop auto-close on focus
+                    }).showToast();
+                } else {
+                    // Handle other responses or errors
+                    console.log(data);
+                }
+            })
+            .catch(error => {
+                // Handle errors here
+                console.error(error);
+            });
+    });
+</script>
+
+</html>

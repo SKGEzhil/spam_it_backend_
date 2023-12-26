@@ -3,7 +3,7 @@ import datetime
 import boto3
 import certifi
 from botocore.config import Config
-from flask import Flask, request
+from flask import Flask, request, render_template
 from passlib.hash import sha256_crypt
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
@@ -47,6 +47,19 @@ s3 = boto3.client('s3',
 BUCKET_NAME='losties'
 base_dir = os.getcwd()
 
+
+
+@app.route('/delete_account', methods=['GET', 'POST'])
+def delete_account():
+    if request.method == 'POST':
+        print(request)
+        json = request.json
+        roll_no = json['roll_no']
+        db.users.delete_one({'roll_no': roll_no})
+        db.posts.delete_many({'roll_no': roll_no})
+        db.replies.delete_many({'roll_no': roll_no})
+        return render_template('account_deleted.html')
+    return render_template('delete_account.html')
 
 # opened post
 @app.route('/set_opened', methods=['POST'])
