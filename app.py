@@ -199,6 +199,16 @@ def sendReplyNotificationToOthers(tokens, name, reply, post_id):
     # for the contents of response.
     print('{0} messages were sent successfully'.format(response.success_count))
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    json = request.json
+    roll_no = json['roll_no']
+    fcm_token = json['fcm_token']
+    fcm_token_list = db.users.find_one({'roll_no': roll_no})['fcm_token']
+    fcm_token_list = list(set(fcm_token_list))
+    fcm_token_list.remove(fcm_token)
+    db.users.update_one({'roll_no': roll_no}, {'$set': {'fcm_token': fcm_token_list}})
+    return 'success'
 
 @app.route('/token_auth', methods=['POST'])
 def tokenAuth():
