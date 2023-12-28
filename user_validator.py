@@ -26,7 +26,7 @@ def validate_roll_no(inp):
         _inp_year = int(inp[2:4])
     except ValueError:
         _inp_year = extract_yr(inp)
-    if re.search(r'[A-Z]{2}\d{2}[A-Z]\d{5}', inp) is not None:
+    if re.search(r'[A-Z]{2}\d{2}[A-Z]+\d{5}', inp) is not None:
         if _inp_year <= current_year:
             print("Valid Username")
             return True
@@ -45,3 +45,4 @@ def validate_email(mail_id):
     else:
         return False
 
+validate_roll_no("EP23BTECH11015")
