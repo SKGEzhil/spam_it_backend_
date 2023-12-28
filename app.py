@@ -56,7 +56,7 @@ def delete_account():
         print(request)
         json = request.json
         roll_no = json['roll_no']
-        db.users.delete_one({'roll_no': roll_no})
+        db.users.delete_one({'roll_no': roll_no.lower()})
         db.posts.delete_many({'roll_no': roll_no})
         db.replies.delete_many({'roll_no': roll_no})
         return render_template('account_deleted.html')
@@ -72,11 +72,11 @@ def setOpened():
     print(post_id)
     print(roll_no)
 
-    opened_posts = db.opened.find_one({'roll_no': roll_no})['posts']
+    opened_posts = db.opened.find_one({'roll_no': roll_no.lower()})['posts']
     print(opened_posts)
     opened_posts.append(post_id)
 
-    db.opened.update_one({'roll_no': roll_no}, {'$set': {'posts': opened_posts}})
+    db.opened.update_one({'roll_no': roll_no.lower()}, {'$set': {'posts': opened_posts}})
     return 'success'
 
 # get opened post
@@ -84,7 +84,7 @@ def setOpened():
 def getOpened():
     json = request.json
     roll_no = json['roll_no']
-    opened_posts = list(db.opened.find_one({'roll_no': roll_no})['posts'])
+    opened_posts = list(db.opened.find_one({'roll_no': roll_no.lower()})['posts'])
     opened_post_json = json_util.dumps(opened_posts)
     return opened_post_json
 
@@ -205,10 +205,10 @@ def logout():
     json = request.json
     roll_no = json['roll_no']
     fcm_token = json['fcm_token']
-    fcm_token_list = db.users.find_one({'roll_no': roll_no})['fcm_token']
+    fcm_token_list = db.users.find_one({'roll_no': roll_no.lower()})['fcm_token']
     fcm_token_list = list(set(fcm_token_list))
     fcm_token_list.remove(fcm_token)
-    db.users.update_one({'roll_no': roll_no}, {'$set': {'fcm_token': fcm_token_list}})
+    db.users.update_one({'roll_no': roll_no.lower()}, {'$set': {'fcm_token': fcm_token_list}})
     return 'success'
 
 @app.route('/token_auth', methods=['POST'])
@@ -218,7 +218,7 @@ def tokenAuth():
     data = token_encryption.decode(token)
     roll_no = data['roll_no']
     password = data['password']
-    user = db.users.find_one({'roll_no': roll_no})
+    user = db.users.find_one({'roll_no': roll_no.lower()})
     if user is None:
         print('User not found')
         return 'no_user'
@@ -237,7 +237,7 @@ def generateToken():
     json = request.json
     roll_no = json['roll_no']
     password = json['password']
-    user = db.users.find_one({'roll_no': roll_no})
+    user = db.users.find_one({'roll_no': roll_no.lower()})
     if user is None:
         print('User not found')
         return 'no_user'
@@ -259,7 +259,7 @@ def generateToken():
 def getUserDetails():
     json = request.json
     roll_no = json['roll_no']
-    user = db.users.find_one({'roll_no': roll_no})
+    user = db.users.find_one({'roll_no': roll_no.lower()})
     user_json = json_util.dumps(user)
     return user_json
 
@@ -273,14 +273,14 @@ def addReply():
     roll_no = json['roll_no']
     reply = json['reply']
     post_id = json['post_id']
-    name = db.users.find_one({'roll_no': roll_no})['name']
-    db.replies.insert_one({'roll_no': roll_no, 'name': name,'reply': reply, 'post_id': post_id, 'date':now.strftime("%I:%M %p | %d %b")})
+    name = db.users.find_one({'roll_no': roll_no.lower()})['name']
+    db.replies.insert_one({'roll_no': roll_no.lower(), 'name': name,'reply': reply, 'post_id': post_id, 'date':now.strftime("%I:%M %p | %d %b")})
 
     roll_no_creator = db.posts.find_one({'_id': ObjectId(post_id)})['roll_no']
     name_creator = db.users.find_one({'roll_no': roll_no_creator})['name']
     creator_fcm_token_list = db.users.find_one({'roll_no': roll_no_creator})['fcm_token']
     replies_fcm_token_list = db.posts.find_one({'_id': ObjectId(post_id)})['replies']
-    fcm_token_list = db.users.find_one({'roll_no': roll_no})['fcm_token']
+    fcm_token_list = db.users.find_one({'roll_no': roll_no.lower()})['fcm_token']
     replies_fcm_token_list.extend(fcm_token_list)
 
     creator_fcm_token_list = list(set(creator_fcm_token_list))
@@ -306,7 +306,7 @@ def getReplies():
 def getAllReplies():
     json = request.json
     roll_no = json['roll_no']
-    all_posts = [str(post['_id']) for post in db.posts.find({'roll_no': roll_no})]
+    all_posts = [str(post['_id']) for post in db.posts.find({'roll_no': roll_no.lower()})]
     all_replies = []
     for post_id in all_posts:
         replies = list(db.replies.find({'post_id': post_id}).sort({ '_id': -1 }))
@@ -347,7 +347,7 @@ def updateProfile():
     roll_no = json['roll_no']
     name = json['name']
     pfp = json['pfp']
-    db.users.update_one({'roll_no': roll_no}, {'$set': {'name': name, 'pfp': pfp}})
+    db.users.update_one({'roll_no': roll_no.lower()}, {'$set': {'name': name, 'pfp': pfp}})
     return 'success'
 
 @app.route('/register', methods=['POST'])
@@ -358,7 +358,7 @@ def register():
     email = json['email']
     password = json['password']
     fcm_token = json['fcm_token']
-    existing_user = db.users.find_one({'roll_no': roll_no})
+    existing_user = db.users.find_one({'roll_no': roll_no.lower()})
 
     fcm_token_list = [fcm_token]
 
@@ -371,8 +371,8 @@ def register():
         if not user_validator.validate_email(email.lower()):
             return 'invalid_email'
         db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list, 'pfp': ''})
-        db.opened.insert_one({'roll_no': roll_no, 'posts': []})
-        token = token_encryption.encode({'roll_no': roll_no, 'password': password})
+        db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
+        token = token_encryption.encode({'roll_no': roll_no.lower(), 'password': password})
         return token
     else:
         return 'failed'
@@ -391,10 +391,10 @@ def login():
         pwd_hash = user.get('password', '')
         if sha256_crypt.verify(password, pwd_hash):
 
-            fcm_token_list = db.users.find_one({'roll_no': roll_no})['fcm_token']
+            fcm_token_list = db.users.find_one({'roll_no': roll_no.lower()})['fcm_token']
             fcm_token_list.append(fcm_token)
 
-            db.users.update_one({'roll_no': roll_no}, {'$set': {'fcm_token': fcm_token_list}})
+            db.users.update_one({'roll_no': roll_no.lower()}, {'$set': {'fcm_token': fcm_token_list}})
             print(id)
             token = token_encryption.encode(json)
             print(token)
@@ -423,9 +423,9 @@ def createPost():
     for tag in tags:
         tagList.append(tag)
 
-    name = db.users.find_one({'roll_no': roll_no})['name']
-    db.posts.insert_one({'roll_no': roll_no, 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b"), 'replies': []})
-    post_id = str(db.posts.find_one({'roll_no': roll_no, 'subject': subject, 'content': content})['_id'])
+    name = db.users.find_one({'roll_no': roll_no.lower()})['name']
+    db.posts.insert_one({'roll_no': roll_no.lower(), 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b"), 'replies': []})
+    post_id = str(db.posts.find_one({'roll_no': roll_no.lower(), 'subject': subject, 'content': content})['_id'])
     print(f'POST ID : {post_id}')
 
     sendNotification(name, subject, post_id)
@@ -444,7 +444,7 @@ def reply():
     roll_no = json['roll_no']
     name = json['name']
     body = json['body']
-    db.replies.insert_one({'id': id, 'roll_no': roll_no, 'name': name, 'body': body})
+    db.replies.insert_one({'id': id, 'roll_no': roll_no.lower(), 'name': name, 'body': body})
     return 'Reply'
 
 
