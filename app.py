@@ -364,6 +364,8 @@ def register():
 
     if existing_user is None:
         pwd_hash = sha256_crypt.encrypt(password)
+        print(roll_no)
+        print(name)
         if not user_validator.validate_roll_no(roll_no):
             return 'invalid_username'
         if not user_validator.validate_email(email):
