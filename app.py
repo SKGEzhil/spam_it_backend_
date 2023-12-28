@@ -366,11 +366,11 @@ def register():
         pwd_hash = sha256_crypt.encrypt(password)
         print(roll_no)
         print(name)
-        if not user_validator.validate_roll_no(roll_no):
+        if not user_validator.validate_roll_no(roll_no.lower()):
             return 'invalid_roll_no'
-        if not user_validator.validate_email(email):
+        if not user_validator.validate_email(email.lower()):
             return 'invalid_email'
-        db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list, 'pfp': ''})
+        db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list, 'pfp': ''})
         db.opened.insert_one({'roll_no': roll_no, 'posts': []})
         token = token_encryption.encode({'roll_no': roll_no, 'password': password})
         return token
@@ -383,7 +383,7 @@ def login():
     roll_no = json['roll_no']
     password = json['password']
     fcm_token = json['fcm_token']
-    user = db.users.find_one({'roll_no': roll_no})
+    user = db.users.find_one({'roll_no': roll_no.lower()})
     if user is None:
         print('User not found')
         return 'failed'
