@@ -16,6 +16,7 @@ import config
 import firebase_admin
 from firebase_admin import credentials, messaging
 import json as pyjson
+import user_validator
 
 
 
@@ -363,6 +364,10 @@ def register():
 
     if existing_user is None:
         pwd_hash = sha256_crypt.encrypt(password)
+        if not user_validator.validate_roll_no(roll_no):
+            return 'invalid_username'
+        if not user_validator.validate_email(email):
+            return 'invalid_email'
         db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list, 'pfp': ''})
         db.opened.insert_one({'roll_no': roll_no, 'posts': []})
         token = token_encryption.encode({'roll_no': roll_no, 'password': password})
