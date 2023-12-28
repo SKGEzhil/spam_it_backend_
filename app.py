@@ -339,6 +339,15 @@ def upload():
 def hello_world():  # put application's code here
     return 'Hello World!'
 
+@app.route('/update_profile', methods=['POST'])
+def updateProfile():
+    json = request.json
+    roll_no = json['roll_no']
+    name = json['name']
+    pfp = json['pfp']
+    db.users.update_one({'roll_no': roll_no}, {'$set': {'name': name, 'pfp': pfp}})
+    return 'success'
+
 @app.route('/register', methods=['POST'])
 def register():
     json = request.json
@@ -353,7 +362,7 @@ def register():
 
     if existing_user is None:
         pwd_hash = sha256_crypt.encrypt(password)
-        db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list})
+        db.users.insert_one({'roll_no': roll_no, 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list, 'pfp': ''})
         db.opened.insert_one({'roll_no': roll_no, 'posts': []})
         token = token_encryption.encode({'roll_no': roll_no, 'password': password})
         return token
