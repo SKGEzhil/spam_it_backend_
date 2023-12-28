@@ -254,12 +254,13 @@ def generateToken():
             return 'incorrect'
 
 # get username
-@app.route('/get_username', methods=['POST'])
-def getUsername():
+@app.route('/get_user_details', methods=['POST'])
+def getUserDetails():
     json = request.json
     roll_no = json['roll_no']
-    name = db.users.find_one({'roll_no': roll_no})['name']
-    return name
+    user = db.users.find_one({'roll_no': roll_no})
+    user_json = json_util.dumps(user)
+    return user_json
 
 @app.route('/add_reply', methods=['POST'])
 def addReply():
