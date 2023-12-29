@@ -274,7 +274,8 @@ def addReply():
     reply = json['reply']
     post_id = json['post_id']
     name = db.users.find_one({'roll_no': roll_no.lower()})['name']
-    db.replies.insert_one({'roll_no': roll_no.lower(), 'name': name,'reply': reply, 'post_id': post_id, 'date':now.strftime("%I:%M %p | %d %b")})
+    pfp = db.users.find_one({'roll_no': roll_no.lower()})['pfp']
+    db.replies.insert_one({'user_details': {'roll_no': roll_no.lower(), 'name': name, 'pfp': pfp},'reply': reply, 'post_id': post_id, 'date':now.strftime("%I:%M %p | %d %b")})
 
     roll_no_creator = db.posts.find_one({'_id': ObjectId(post_id)})['roll_no']
     name_creator = db.users.find_one({'roll_no': roll_no_creator})['name']
@@ -418,13 +419,15 @@ def createPost():
 
     # cabDetails = pyjson.loads(cab_details)
 
+    creator_pfp = db.users.find_one({'roll_no': roll_no.lower()})['pfp']
+
     tagList = []
 
     for tag in tags:
         tagList.append(tag)
 
     name = db.users.find_one({'roll_no': roll_no.lower()})['name']
-    db.posts.insert_one({'roll_no': roll_no.lower(), 'name': name, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b"), 'replies': []})
+    db.posts.insert_one({'user_details': {'roll_no': roll_no.lower(), 'name': name, 'pfp': creator_pfp}, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b"), 'replies': []})
     post_id = str(db.posts.find_one({'roll_no': roll_no.lower(), 'subject': subject, 'content': content})['_id'])
     print(f'POST ID : {post_id}')
 
