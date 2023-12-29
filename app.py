@@ -307,7 +307,7 @@ def getReplies():
 def getAllReplies():
     json = request.json
     roll_no = json['roll_no']
-    all_posts = [str(post['_id']) for post in db.posts.find({'roll_no': roll_no.lower()})]
+    all_posts = [str(post['_id']) for post in db.posts.find({'user_details': {'roll_no': roll_no.lower()}})]
     all_replies = []
     for post_id in all_posts:
         replies = list(db.replies.find({'post_id': post_id}).sort({ '_id': -1 }))
@@ -428,7 +428,7 @@ def createPost():
 
     name = db.users.find_one({'roll_no': roll_no.lower()})['name']
     db.posts.insert_one({'user_details': {'roll_no': roll_no.lower(), 'name': name, 'pfp': creator_pfp}, 'subject': subject, 'content': content, 'image': image, 'tags': tagList, 'cab': cab_details, 'date':today.strftime("%d %b"), 'replies': []})
-    post_id = str(db.posts.find_one({'roll_no': roll_no.lower(), 'subject': subject, 'content': content})['_id'])
+    post_id = str(db.posts.find_one({'user_details': {'roll_no': roll_no.lower()}, 'subject': subject, 'content': content})['_id'])
     print(f'POST ID : {post_id}')
 
     sendNotification(name, subject, post_id)
