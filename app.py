@@ -208,6 +208,15 @@ def logout():
     db.users.update_one({'roll_no': roll_no.lower()}, {'$set': {'fcm_token': fcm_token_list}})
     return 'success'
 
+@app.route('/validate_roll_no', methods=['POST'])
+def validate_roll_no():
+    json = request.json
+    roll_no = json['roll_no']
+    if not user_validator.validate_roll_no(roll_no.lower()):
+        return 'invalid_roll_no'
+    return 'success'
+
+
 @app.route('/token_auth', methods=['POST'])
 def tokenAuth():
     json = request.json
