@@ -1,5 +1,4 @@
 import datetime
-
 import boto3
 import certifi
 from botocore.config import Config
@@ -15,9 +14,7 @@ import os
 import config
 import firebase_admin
 from firebase_admin import credentials, messaging
-import json as pyjson
 import user_validator
-
 
 
 # Firebase admin sdk
@@ -375,6 +372,31 @@ def register():
         db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
         token = token_encryption.encode({'roll_no': roll_no.lower(), 'password': password})
         return token
+    else:
+        return 'failed'
+
+@app.route('/google_register', methods=['POST'])
+def google_register():
+    json = request.json
+    roll_no = json['roll_no']
+    name = json['name']
+    email = json['email']
+    pfp = json['pfp']
+    fcm_token = json['fcm_token']
+    existing_user = db.users.find_one({'roll_no': roll_no.lower()})
+
+    fcm_token_list = [fcm_token]
+
+    if existing_user is None:
+        print(roll_no)
+        print(name)
+        if not user_validator.validate_roll_no(roll_no.lower()):
+            return 'invalid_roll_no'
+        if not user_validator.validate_email(email.lower()):
+            return 'invalid_email'
+        db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': 'google_user', 'fcm_token': fcm_token_list, 'pfp': pfp})
+        db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
+        return 'success'
     else:
         return 'failed'
 
