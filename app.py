@@ -408,7 +408,7 @@ def google_register():
         db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
         return token
     else:
-        return 'failed'
+        return token
 
 @app.route('/google_login', methods=['POST'])
 def google_login():
