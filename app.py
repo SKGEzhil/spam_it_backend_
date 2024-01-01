@@ -393,21 +393,44 @@ def google_register():
     pfp = json['pfp']
     fcm_token = json['fcm_token']
     existing_user = db.users.find_one({'roll_no': roll_no.lower()})
-
+    token = token_encryption.encode({'roll_no': roll_no.lower(), 'email': email, 'secret_key': config.secret_key})
     fcm_token_list = [fcm_token]
 
     if existing_user is None:
         print(roll_no)
         print(name)
+        pwd_hash = sha256_crypt.encrypt(token)
         if not user_validator.validate_roll_no(roll_no.lower()):
             return 'invalid_roll_no'
         if not user_validator.validate_email(email.lower()):
             return 'invalid_email'
-        db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': 'google_user', 'fcm_token': fcm_token_list, 'pfp': pfp})
+        db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': pwd_hash, 'google_user': True, 'fcm_token': fcm_token_list, 'pfp': pfp})
         db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
-        return 'success'
+        return token
     else:
         return 'failed'
+
+@app.route('/google_login', methods=['POST'])
+def google_login():
+    json = request.json
+    token = json['token']
+    data = token_encryption.decode(token)
+    roll_no = data['roll_no']
+    user = db.users.find_one({'roll_no': roll_no.lower()})
+    if user is None:
+        print('User not found')
+        return 'no_user'
+    else:
+        if user['google_user'] == False:
+            return 'native_login'
+        pwd_hash = user.get('password', '')
+        if sha256_crypt.verify(token, pwd_hash):
+            print(data['roll_no'])
+            return 'success'
+        else:
+            print('incorrect')
+            return 'incorrect'
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -421,8 +444,9 @@ def login():
         return 'failed'
     else:
         pwd_hash = user.get('password', '')
+        if user['google_user'] == True:
+            return 'google_login'
         if sha256_crypt.verify(password, pwd_hash):
-
             fcm_token_list = db.users.find_one({'roll_no': roll_no.lower()})['fcm_token']
             fcm_token_list.append(fcm_token)
 
