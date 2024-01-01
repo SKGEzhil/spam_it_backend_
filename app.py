@@ -408,6 +408,7 @@ def google_register():
         db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
         return token
     else:
+        db.users.update_one({'roll_no': roll_no.lower()}, {'$set': {'fcm_token': fcm_token_list}})
         return token
 
 @app.route('/google_login', methods=['POST'])
