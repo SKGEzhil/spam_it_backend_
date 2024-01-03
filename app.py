@@ -377,7 +377,7 @@ def register():
             return 'invalid_roll_no'
         if not user_validator.validate_email(email.lower()):
             return 'invalid_email'
-        db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': pwd_hash, 'fcm_token': fcm_token_list, 'pfp': ''})
+        db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': pwd_hash, 'google_user': False, 'fcm_token': fcm_token_list, 'pfp': ''})
         db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
         token = token_encryption.encode({'roll_no': roll_no.lower(), 'password': password})
         return token
@@ -432,6 +432,37 @@ def google_login():
             print('incorrect')
             return 'incorrect'
 
+@app.route('/google_auth', methods=['POST'])
+def google_auth():
+    json = request.json
+    roll_no = json['roll_no']
+    name = json['name']
+    email = json['email']
+    pfp = json['pfp']
+    fcm_token = json['fcm_token']
+    existing_user = db.users.find_one({'roll_no': roll_no.lower()})
+    token = token_encryption.encode({'roll_no': roll_no.lower(), 'email': email, 'secret_key': config.secret_key})
+    fcm_token_list = [fcm_token]
+
+    if not existing_user['google_user']:
+        print('native_login')
+        return 'native_login'
+
+    if existing_user is None:
+        print(roll_no)
+        print(name)
+        pwd_hash = sha256_crypt.encrypt(token)
+        if not user_validator.validate_roll_no(roll_no.lower()):
+            return 'invalid_roll_no'
+        if not user_validator.validate_email(email.lower()):
+            return 'invalid_email'
+        db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': pwd_hash, 'google_user': True, 'fcm_token': fcm_token_list, 'pfp': pfp})
+        db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
+        return 'success'
+    else:
+        db.users.update_one({'roll_no': roll_no.lower()}, {'$set': {'fcm_token': fcm_token_list}})
+        return 'success'
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -445,7 +476,7 @@ def login():
         return 'failed'
     else:
         pwd_hash = user.get('password', '')
-        if user['google_user'] == True:
+        if user['google_user']:
             return 'google_login'
         if sha256_crypt.verify(password, pwd_hash):
             fcm_token_list = db.users.find_one({'roll_no': roll_no.lower()})['fcm_token']
