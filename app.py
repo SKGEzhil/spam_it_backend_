@@ -455,6 +455,7 @@ def google_auth():
         if not user_validator.validate_roll_no(roll_no.lower()):
             return 'invalid_roll_no'
         if not user_validator.validate_email(email.lower()):
+            print('INVALID EMAIL')
             return 'invalid_email'
         db.users.insert_one({'roll_no': roll_no.lower(), 'name': name, 'email': email, 'password': pwd_hash, 'google_user': True, 'fcm_token': fcm_token_list, 'pfp': pfp})
         db.opened.insert_one({'roll_no': roll_no.lower(), 'posts': []})
