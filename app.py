@@ -645,4 +645,4 @@ def ssl_verification():
 
 if __name__ == "__main__":
     context = ("certificate.crt", "private.key")  # certificate and key files
-    app.run(host="0.0.0.0", port=80, debug=True, threaded=True, ssl_context=context)
+    app.run(host="0.0.0.0", port=443, debug=True, threaded=True, ssl_context=context)
