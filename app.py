@@ -484,11 +484,17 @@ def google_login():
 @app.route("/google_auth", methods=["POST"])
 def google_auth():
     json = request.json
-    roll_no = json["roll_no"]
+    # roll_no = json["roll_no"]
     name = json["name"]
     email = json["email"]
     pfp = json["pfp"]
     fcm_token = json["fcm_token"]
+
+    roll_no = user_validator.extract_roll_no(email)
+
+    if roll_no == "None":
+        return "invalid_email"
+
     existing_user = db.users.find_one({"roll_no": roll_no.lower()})
     token = token_encryption.encode(
         {"roll_no": roll_no.lower(), "email": email, "secret_key": config.secret_key}
@@ -499,11 +505,6 @@ def google_auth():
         print(roll_no)
         print(name)
         pwd_hash = sha256_crypt.encrypt(token)
-        if not user_validator.validate_roll_no(roll_no.lower()):
-            return "invalid_roll_no"
-        if not user_validator.validate_email(email.lower()):
-            print("INVALID EMAIL")
-            return "invalid_email"
         db.users.insert_one(
             {
                 "roll_no": roll_no.lower(),
