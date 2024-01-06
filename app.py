@@ -2,7 +2,7 @@ import datetime
 import boto3
 import certifi
 from botocore.config import Config
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, send_file
 from passlib.hash import sha256_crypt
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
@@ -632,6 +632,15 @@ def reply():
         {"id": id, "roll_no": roll_no.lower(), "name": name, "body": body}
     )
     return "Reply"
+
+
+@app.route(
+    "/.well-known/pki-validation/E8D74DCB6928DE8CB1EE1B37BBF79CFE.txt", methods=["GET"]
+)
+def ssl_verification():
+    return send_file(
+        ".well-known/pki-validation/E8D74DCB6928DE8CB1EE1B37BBF79CFE.txt",
+    )
 
 
 if __name__ == "__main__":
