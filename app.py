@@ -485,7 +485,7 @@ def google_login():
 def testing_attendance():
     print("testing_attendance")
     data = request.json
-    print(jsonify(data))
+    print(data)
     return jsonify(data)
 
 
