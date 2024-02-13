@@ -2,7 +2,7 @@ import datetime
 import boto3
 import certifi
 from botocore.config import Config
-from flask import Flask, request, render_template, send_file
+from flask import Flask, request, render_template, send_file, jsonify
 from passlib.hash import sha256_crypt
 from pymongo import MongoClient
 from werkzeug.utils import secure_filename
@@ -484,8 +484,9 @@ def google_login():
 @app.route("/GetMobileAppValidatePassword", methods=["POST"])
 def testing_attendance():
     print("testing_attendance")
-    json = request.json
-    print(json)
+    data = request.json
+    print(jsonify(data))
+    return jsonify(data)
 
 
 @app.route("/google_auth", methods=["POST"])
