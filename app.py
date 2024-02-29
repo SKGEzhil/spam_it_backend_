@@ -481,14 +481,6 @@ def google_login():
             return "incorrect"
 
 
-@app.route("/GetMobileAppValidatePassword", methods=["POST"])
-def testing_attendance():
-    print("testing_attendance")
-    data = request.json
-    print(data)
-    return jsonify(data)
-
-
 @app.route("/google_auth", methods=["POST"])
 def google_auth():
     json = request.json
